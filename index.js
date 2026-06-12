@@ -52,27 +52,44 @@ async function run() {
     })
 
     app.post('/api/jobs', async(req, res) =>{
+
       const job = req.body;
-      const result = await jobCollection.insertOne(job);
+      const newJob ={
+        ...job,
+        createdAt: new Date()
+      }
+
+      // const job = req.body;
+      const result = await jobCollection.insertOne(newJob);
       res.send(result);
     })
 
     //company related api
-    app.get('/api/my/compamies', async(req, res) =>{
+    app.get('/api/my/companies', async(req, res) =>{
       const query = {};
       if(req.query.recruiterId){
         query.recruiterId = req.query.recruiterId;
       }
       const result = await companyCollection.findOne(query);
-      res.send(result);
+      console.log('my company', result);
+      res.send(result || {});
     })
 
     app.post('/api/companies', async(req, res) => {
       const company = req.body;
-      const result = await companyCollection.insertOne(company);
+      const newCompany = {
+        ...company,
+        createdAt: new Date()
+      }
+      const result = await companyCollection.insertOne(newCompany);
       res.send(result);
     })
 
+    app.get('/api/companies', async(req,res)=>{
+      const cursor = companyCollection.find();//skip(4)
+      const result = await cursor.toArray();
+      res.send(result);
+    })
 
 
     // Send a ping to confirm a successful connection
