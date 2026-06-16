@@ -11,7 +11,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('Hello Labib!')
 })
 
 
@@ -37,6 +37,10 @@ async function run() {
     const jobCollection = database.collection("jobs");
     const companyCollection = database.collection("companies")
     const applicationsCollection = database.collection("applications");
+    const planCollection = database.collection("plans");
+    const subscriptionCollection = database.collection("subscriptions");
+    const usersCollection = database.collection("user");
+    
 
     app.get('/api/jobs', async (req, res) =>{
       const query = {};
@@ -65,7 +69,7 @@ async function run() {
       res.send(result);
     })
       //Application Related
-
+ 
       app.get('/api/applications', async(req,res) =>{
         const query ={};
         if(req.query.applicantId){
@@ -89,6 +93,36 @@ async function run() {
 
         const result = await applicationsCollection.insertOne(newApplication);
         res.send(result);
+      })
+
+      //plans
+      app.get('/api/plans', async(req, res) => {
+        const query = {}
+        if(req.query.plan_id){
+          query.id = req.query.plan_id
+        }
+        const plan = await planCollection.findOne(query);
+        res.send(plan)
+      })
+
+      //subcriptions
+      app.post('/api/subscriptions', async (req, res) =>{
+        const data = req.body;
+        const subsInfo = {
+          ...data,
+          createdAt: new Date()
+        }
+        const result = await subscriptionCollection.insertOne(subsInfo);
+        //  res.send(result);
+        //update the user information
+        const filter = {email: data.email};
+        const updateDocument = {
+          $set:{
+            plan: data.planId,
+          },
+        };
+        const updateResult = await usersCollection.updateOne(filter, updateDocument);
+          res.send(updateResult)
       })
 
     //company related api
